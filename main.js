@@ -12,6 +12,7 @@ const gameSettings = {
 let state = 'waiting'; // 'waiting' or 'answering'
 let currentQuestion = null;
 let userAnswer = '';
+let isFirstTime = true;
 
 function drawFinger(x, y, height) {
     // Draw finger as a rounded rectangle (top only)
@@ -151,13 +152,26 @@ document.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     
     if (e.key === ' ' && state === 'waiting') {
-        currentQuestion = generateQuestion();
-        userAnswer = '';
-        state = 'answering';
-        
-        header.textContent = `${currentQuestion.n1} + ${currentQuestion.n2}`;
-        speak(currentQuestion.question);
-        draw();
+        if (isFirstTime) {
+            isFirstTime = false;
+            speak('Welcome to finger counting!', () => {
+                currentQuestion = generateQuestion();
+                userAnswer = '';
+                state = 'answering';
+                
+                header.textContent = `${currentQuestion.n1} + ${currentQuestion.n2}`;
+                speak(currentQuestion.question);
+                draw();
+            });
+        } else {
+            currentQuestion = generateQuestion();
+            userAnswer = '';
+            state = 'answering';
+            
+            header.textContent = `${currentQuestion.n1} + ${currentQuestion.n2}`;
+            speak(currentQuestion.question);
+            draw();
+        }
     } else if (state === 'answering' || state === 'incorrect') {
         if (e.key >= '0' && e.key <= '9') {
             userAnswer += e.key;
