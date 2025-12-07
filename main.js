@@ -45,8 +45,8 @@ function drawFinger(x, y, height) {
     ctx.fill();
 }
 
-function drawHand(x, y, fingerCount, side) {
-    const fingerSpacing = 30;
+function drawHand(x, y, fingerCount, number) {
+    const fingerSpacing = 52;
     const startX = x - (fingerCount - 1) * fingerSpacing / 2;
     const baseHeight = 250; // Extended to ensure bottom is always hidden
     
@@ -61,6 +61,12 @@ function drawHand(x, y, fingerCount, side) {
         
         drawFinger(startX + i * fingerSpacing, y + yOffset, baseHeight);
     }
+    
+    // Draw number label at top of canvas above hand
+    ctx.fillStyle = 'black';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(number, x, 50);
 }
 
 function clearCanvas() {
@@ -73,10 +79,10 @@ function draw() {
     if (state === 'answering' || state === 'incorrect' || state === 'correct') {
         if (currentQuestion) {
             // Draw left hand (fingers grow from bottom, shorter visible height)
-            drawHand(200, canvas.height - 100, currentQuestion.n1, 'Left');
+            drawHand(200, canvas.height - 100, currentQuestion.n1, currentQuestion.n1);
             
             // Draw right hand (fingers grow from bottom, shorter visible height)
-            drawHand(600, canvas.height - 100, currentQuestion.n2, 'Right');
+            drawHand(600, canvas.height - 100, currentQuestion.n2, currentQuestion.n2);
         }
     }
 }
