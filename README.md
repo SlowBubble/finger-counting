@@ -13,3 +13,11 @@ Build a math game using index.html and main.js using a header and a canvas
 
 # m1b
 - similar to old.js, I want to add Game Settings, with a JSON that specify maxLeftFingers and maxRightFingers defaulting to 5 and utteranceRate defaulting to 0.2
+
+# m1c
+- Align the header text to the left (alongside the left edge of the canvas) so text doesn't move around after user input
+- Remove the left and right labels from the canvas
+- Make the canvas 1/2 the current height
+- Make the fingers a bit prettier
+- Have the fingers grow from the bottom edge of the canvas
+- Have the height of the fingers be sloping upward for the left and sloping downward on the right
