@@ -2,6 +2,13 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const header = document.getElementById('header');
 
+const urlParams = new URLSearchParams(window.location.search);
+const gameSettings = {
+    maxLeftFingers: parseInt(urlParams.get('maxLeftFingers')) || 5,
+    maxRightFingers: parseInt(urlParams.get('maxRightFingers')) || 5,
+    utteranceRate: parseFloat(urlParams.get('utteranceRate')) || 0.4
+};
+
 let state = 'waiting'; // 'waiting' or 'answering'
 let currentQuestion = null;
 let userAnswer = '';
@@ -57,8 +64,8 @@ function draw() {
 }
 
 function generateQuestion() {
-    const n1 = Math.floor(Math.random() * 5) + 1; // 1 to 5
-    const n2 = Math.floor(Math.random() * 5) + 1; // 1 to 5
+    const n1 = Math.floor(Math.random() * gameSettings.maxLeftFingers) + 1;
+    const n2 = Math.floor(Math.random() * gameSettings.maxRightFingers) + 1;
     const correctAnswer = n1 + n2;
     
     return {
@@ -71,11 +78,53 @@ function generateQuestion() {
 
 function speak(text, onEnd) {
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = gameSettings.utteranceRate;
     if (onEnd) {
         utterance.onend = onEnd;
     }
     speechSynthesis.speak(utterance);
 }
+
+function updateURLParams() {
+    const params = new URLSearchParams();
+    if (gameSettings.maxLeftFingers !== 5) {
+        params.set('maxLeftFingers', gameSettings.maxLeftFingers);
+    }
+    if (gameSettings.maxRightFingers !== 5) {
+        params.set('maxRightFingers', gameSettings.maxRightFingers);
+    }
+    if (gameSettings.utteranceRate !== 0.2) {
+        params.set('utteranceRate', gameSettings.utteranceRate);
+    }
+    const newURL = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
+    window.history.replaceState({}, '', newURL);
+}
+
+document.getElementById('gameSettingsBtn').addEventListener('click', () => {
+    const content = `
+        <h2>Game Settings (JSON)</h2>
+        <textarea id="settingsData" style="font-size: 1.5em; width: 100%; min-height: 400px;">${JSON.stringify(gameSettings, null, 2)}</textarea>
+        <p style="color: #666; font-size: 14px;">Press Enter to save, Escape to cancel</p>
+    `;
+    
+    createModal(content, (modal) => {
+        const textarea = modal.querySelector('#settingsData');
+        try {
+            const newSettings = JSON.parse(textarea.value);
+            if (typeof newSettings === 'object' && !Array.isArray(newSettings)) {
+                Object.assign(gameSettings, newSettings);
+                updateURLParams();
+                return true;
+            } else {
+                alert('Invalid format: must be an object');
+                return false;
+            }
+        } catch (e) {
+            alert('Invalid JSON: ' + e.message);
+            return false;
+        }
+    });
+});
 
 document.addEventListener('keydown', (e) => {
     if (e.repeat) return;

@@ -10,3 +10,6 @@ Build a math game using index.html and main.js using a header and a canvas
     - In the canvas, render n1 fingers on the left and n2 fingers on the right
       - The drawing can be very simple, just thin rectangles sticking out of the bottom capped by circles, and color in the skin and nails.
 - When the user press numbers, handle it similar to how things are handled in old.js (but using the header instead of the canvas)
+
+# m1b
+- similar to old.js, I want to add Game Settings, with a JSON that specify maxLeftFingers and maxRightFingers defaulting to 5 and utteranceRate defaulting to 0.2
