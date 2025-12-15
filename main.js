@@ -6,7 +6,8 @@ const urlParams = new URLSearchParams(window.location.search);
 const gameSettings = {
     maxLeftFingers: parseInt(urlParams.get('maxLeftFingers')) || 5,
     maxRightFingers: parseInt(urlParams.get('maxRightFingers')) || 5,
-    utteranceRate: parseFloat(urlParams.get('utteranceRate')) || 0.4
+    utteranceRate: parseFloat(urlParams.get('utteranceRate')) || 0.4,
+    canto: parseInt(urlParams.get('canto')) === 1
 };
 
 let state = 'waiting'; // 'waiting' or 'answering'
@@ -92,21 +93,56 @@ function generateQuestion() {
     const n2 = Math.floor(Math.random() * gameSettings.maxRightFingers) + 1;
     const correctAnswer = n1 + n2;
     
-    const leftText = n1 === 1 ? '1 finger' : `${n1} fingers`;
-    const rightText = n2 === 1 ? '1 finger' : `${n2} fingers`;
-    const totalText = correctAnswer === 1 ? 'finger is' : 'fingers are';
-    
-    return {
-        n1,
-        n2,
-        correctAnswer,
-        question: `I have ${leftText} on the left and ${rightText} on the right. How many ${totalText} there?`
-    };
+    if (gameSettings.canto) {
+        // Cantonese numbers: 一, 二, 三, 四, 五, 六, 七, 八, 九, 十
+        const cantoNumbers = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+        const leftText = `${cantoNumbers[n1]}隻手指`;
+        const rightText = `${cantoNumbers[n2]}隻手指`;
+        
+        return {
+            n1,
+            n2,
+            correctAnswer,
+            question: `我左手有${leftText}，右手有${rightText}。總共有幾多隻手指？`
+        };
+    } else {
+        const leftText = n1 === 1 ? '1 finger' : `${n1} fingers`;
+        const rightText = n2 === 1 ? '1 finger' : `${n2} fingers`;
+        const totalText = correctAnswer === 1 ? 'finger is' : 'fingers are';
+        
+        return {
+            n1,
+            n2,
+            correctAnswer,
+            question: `I have ${leftText} on the left and ${rightText} on the right. How many ${totalText} there?`
+        };
+    }
 }
 
 function speak(text, onEnd) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = gameSettings.utteranceRate;
+    
+    if (gameSettings.canto) {
+        // Try to find a Cantonese voice
+        const voices = speechSynthesis.getVoices();
+        const cantoVoice = voices.find(voice => 
+            voice.lang.includes('zh-HK') || 
+            voice.lang.includes('zh-yue') ||
+            voice.name.toLowerCase().includes('cantonese') ||
+            voice.name.toLowerCase().includes('hong kong')
+        );
+        if (cantoVoice) {
+            utterance.voice = cantoVoice;
+        } else {
+            // Fallback to any Chinese voice
+            const chineseVoice = voices.find(voice => voice.lang.startsWith('zh'));
+            if (chineseVoice) {
+                utterance.voice = chineseVoice;
+            }
+        }
+    }
+    
     if (onEnd) {
         utterance.onend = onEnd;
     }
@@ -121,8 +157,11 @@ function updateURLParams() {
     if (gameSettings.maxRightFingers !== 5) {
         params.set('maxRightFingers', gameSettings.maxRightFingers);
     }
-    if (gameSettings.utteranceRate !== 0.2) {
+    if (gameSettings.utteranceRate !== 0.4) {
         params.set('utteranceRate', gameSettings.utteranceRate);
+    }
+    if (gameSettings.canto) {
+        params.set('canto', '1');
     }
     const newURL = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
     window.history.replaceState({}, '', newURL);
@@ -166,7 +205,8 @@ document.addEventListener('keydown', (e) => {
     if (e.key === ' ' && state === 'waiting') {
         if (isFirstTime) {
             isFirstTime = false;
-            speak('Welcome to finger counting!', () => {
+            const welcomeMsg = gameSettings.canto ? '歡迎來到數手指遊戲！' : 'Welcome to finger counting!';
+            speak(welcomeMsg, () => {
                 currentQuestion = generateQuestion();
                 userAnswer = '';
                 state = 'answering';
@@ -206,7 +246,13 @@ document.addEventListener('keydown', (e) => {
                 
                 if (answer === currentQuestion.correctAnswer) {
                     state = 'correct';
-                    const successMsg = `Very nice. I have ${currentQuestion.n1} plus ${currentQuestion.n2} fingers, or ${currentQuestion.correctAnswer} fingers.`;
+                    let successMsg;
+                    if (gameSettings.canto) {
+                        const cantoNumbers = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+                        successMsg = `好叻！我有${cantoNumbers[currentQuestion.n1]}加${cantoNumbers[currentQuestion.n2]}隻手指，即係${cantoNumbers[currentQuestion.correctAnswer]}隻手指。`;
+                    } else {
+                        successMsg = `Very nice. I have ${currentQuestion.n1} plus ${currentQuestion.n2} fingers, or ${currentQuestion.correctAnswer} fingers.`;
+                    }
                     speak(successMsg, () => {
                         state = 'waiting';
                         userAnswer = '';
@@ -215,7 +261,8 @@ document.addEventListener('keydown', (e) => {
                     });
                 } else {
                     state = 'incorrect';
-                    speak('Incorrect. Please try again.', () => {
+                    const incorrectMsg = gameSettings.canto ? '錯咗。請再試一次。' : 'Incorrect. Please try again.';
+                    speak(incorrectMsg, () => {
                         userAnswer = '';
                         state = 'answering';
                         header.textContent = `${currentQuestion.n1} + ${currentQuestion.n2}`;
