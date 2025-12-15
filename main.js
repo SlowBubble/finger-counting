@@ -157,6 +157,12 @@ document.getElementById('gameSettingsBtn').addEventListener('click', () => {
 document.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     
+    if (e.key === '/') {
+        e.preventDefault(); // Prevent default browser search behavior
+        document.getElementById('gameSettingsBtn').click();
+        return;
+    }
+    
     if (e.key === ' ' && state === 'waiting') {
         if (isFirstTime) {
             isFirstTime = false;
