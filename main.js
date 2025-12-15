@@ -94,16 +94,13 @@ function generateQuestion() {
     const correctAnswer = n1 + n2;
     
     if (gameSettings.canto) {
-        // Cantonese numbers: 一, 二, 三, 四, 五, 六, 七, 八, 九, 十
-        const cantoNumbers = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-        const leftText = `${cantoNumbers[n1]}隻手指`;
-        const rightText = `${cantoNumbers[n2]}隻手指`;
-        
+        const leftText = n1 === 2 ? '兩隻手指' : `${n1}隻手指`;
+        const rightText = n2 === 2 ? '兩隻手指' : `${n2}隻手指`;
         return {
             n1,
             n2,
             correctAnswer,
-            question: `我左手有${leftText}，右手有${rightText}。總共有幾多隻手指？`
+            question: `如果我左手有${leftText}，右手有${rightText}。你知唔知我總共有幾多隻手指呀？`
         };
     } else {
         const leftText = n1 === 1 ? '1 finger' : `${n1} fingers`;
@@ -248,8 +245,10 @@ document.addEventListener('keydown', (e) => {
                     state = 'correct';
                     let successMsg;
                     if (gameSettings.canto) {
-                        const cantoNumbers = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-                        successMsg = `好叻！我有${cantoNumbers[currentQuestion.n1]}加${cantoNumbers[currentQuestion.n2]}隻手指，即係${cantoNumbers[currentQuestion.correctAnswer]}隻手指。`;
+                        const n1Text = currentQuestion.n1 === 2 ? '兩' : currentQuestion.n1;
+                        const n2Text = currentQuestion.n2 === 2 ? '兩' : currentQuestion.n2;
+                        const answerText = currentQuestion.correctAnswer === 2 ? '兩' : currentQuestion.correctAnswer;
+                        successMsg = `冇錯！我有${n1Text}, 加${n2Text}隻手指，即係${answerText}隻手指。`;
                     } else {
                         successMsg = `Very nice. I have ${currentQuestion.n1} plus ${currentQuestion.n2} fingers, or ${currentQuestion.correctAnswer} fingers.`;
                     }
