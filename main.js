@@ -260,7 +260,20 @@ document.addEventListener('keydown', (e) => {
                     });
                 } else {
                     state = 'incorrect';
-                    const incorrectMsg = gameSettings.canto ? '錯咗。請再試一次。' : 'Incorrect. Please try again.';
+                    let incorrectMsg;
+                    if (gameSettings.canto) {
+                        if (answer > currentQuestion.correctAnswer) {
+                            incorrectMsg = '太大啦。試下細啲嘅數字。';
+                        } else {
+                            incorrectMsg = '太細啦。試下大啲嘅數字。';
+                        }
+                    } else {
+                        if (answer > currentQuestion.correctAnswer) {
+                            incorrectMsg = 'Too big. Try a smaller number.';
+                        } else {
+                            incorrectMsg = 'Too small. Try a bigger number.';
+                        }
+                    }
                     speak(incorrectMsg, () => {
                         userAnswer = '';
                         state = 'answering';
