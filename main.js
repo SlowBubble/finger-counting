@@ -6,7 +6,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const gameSettings = {
     maxLeftFingers: parseInt(urlParams.get('maxLeftFingers')) || 5,
     maxRightFingers: parseInt(urlParams.get('maxRightFingers')) || 5,
-    utteranceRate: parseFloat(urlParams.get('utteranceRate')) || 0.4,
+    utteranceRate: parseFloat(urlParams.get('utteranceRate')) || 1,
     canto: parseInt(urlParams.get('canto')) === 1
 };
 
@@ -245,10 +245,17 @@ document.addEventListener('keydown', (e) => {
                     state = 'correct';
                     let successMsg;
                     if (gameSettings.canto) {
-                        const n1Text = currentQuestion.n1 === 2 ? '兩' : currentQuestion.n1;
-                        const n2Text = currentQuestion.n2 === 2 ? '兩' : currentQuestion.n2;
                         const answerText = currentQuestion.correctAnswer === 2 ? '兩' : currentQuestion.correctAnswer;
-                        successMsg = `冇錯！我有${n1Text}, 加${n2Text}隻手指，即係${answerText}隻手指。`;
+                        const praises = [
+                            '你真係好嘢',
+                            '冇錯',
+                            '答啱咗',
+                            '好勁呀',
+                            '好犀利',
+                            '非常出色',
+                        ];
+                        const praise = praises[Math.floor(Math.random() * praises.length)];
+                        successMsg = `${praise}！${currentQuestion.n1}, 加${currentQuestion.n2}，係${answerText}隻手指。`;
                     } else {
                         successMsg = `Very nice. I have ${currentQuestion.n1} plus ${currentQuestion.n2} fingers, or ${currentQuestion.correctAnswer} fingers.`;
                     }
