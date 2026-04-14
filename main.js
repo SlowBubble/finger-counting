@@ -4,6 +4,8 @@ const header = document.getElementById('header');
 
 const urlParams = new URLSearchParams(window.location.search);
 const gameSettings = {
+    minLeftFingers: parseInt(urlParams.get('minLeftFingers')) || 1,
+    minRightFingers: parseInt(urlParams.get('minRightFingers')) || 1,
     maxLeftFingers: parseInt(urlParams.get('maxLeftFingers')) || 5,
     maxRightFingers: parseInt(urlParams.get('maxRightFingers')) || 5,
     utteranceRate: parseFloat(urlParams.get('utteranceRate')) || 1,
@@ -80,17 +82,17 @@ function draw() {
     if (state === 'answering' || state === 'incorrect' || state === 'correct') {
         if (currentQuestion) {
             // Draw left hand (fingers grow from bottom, shorter visible height)
-            drawHand(200, canvas.height - 100, currentQuestion.n1, currentQuestion.n1);
+            drawHand(240, canvas.height - 100, currentQuestion.n1, currentQuestion.n1);
             
             // Draw right hand (fingers grow from bottom, shorter visible height)
-            drawHand(600, canvas.height - 100, currentQuestion.n2, currentQuestion.n2);
+            drawHand(720, canvas.height - 100, currentQuestion.n2, currentQuestion.n2);
         }
     }
 }
 
 function generateQuestion() {
-    const n1 = Math.floor(Math.random() * gameSettings.maxLeftFingers) + 1;
-    const n2 = Math.floor(Math.random() * gameSettings.maxRightFingers) + 1;
+    const n1 = Math.floor(Math.random() * (gameSettings.maxLeftFingers - gameSettings.minLeftFingers + 1)) + gameSettings.minLeftFingers;
+    const n2 = Math.floor(Math.random() * (gameSettings.maxRightFingers - gameSettings.minRightFingers + 1)) + gameSettings.minRightFingers;
     const correctAnswer = n1 + n2;
     
     if (gameSettings.canto) {
@@ -148,6 +150,12 @@ function speak(text, onEnd) {
 
 function updateURLParams() {
     const params = new URLSearchParams();
+    if (gameSettings.minLeftFingers !== 1) {
+        params.set('minLeftFingers', gameSettings.minLeftFingers);
+    }
+    if (gameSettings.minRightFingers !== 1) {
+        params.set('minRightFingers', gameSettings.minRightFingers);
+    }
     if (gameSettings.maxLeftFingers !== 5) {
         params.set('maxLeftFingers', gameSettings.maxLeftFingers);
     }
